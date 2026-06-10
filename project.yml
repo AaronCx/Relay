@@ -1,4 +1,4 @@
-name: Relay
+name: aTerminal
 options:
   bundleIdPrefix: com.aaroncx
   deploymentTarget:
@@ -17,19 +17,20 @@ packages:
     url: https://github.com/migueldeicaza/SwiftTerm.git
     from: "1.13.0"
 targets:
-  Relay:
+  aTerminal:
     type: application
     platform: iOS
     sources:
-      - Relay
+      - aTerminal
       - path: Resources
         buildPhase: resources
     dependencies:
-      - target: RelayWidgets
+      - target: aTerminalWidgets
       - package: Citadel
       - package: SwiftTerm
     settings:
       base:
+        # Locked in App Store Connect since build 1 — do not rename.
         PRODUCT_BUNDLE_IDENTIFIER: com.aaroncx.relay
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         # XcodeGen's per-target default is "1,2"; this app is iPhone-only.
@@ -37,11 +38,11 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         # Empty by default (automatic signing). The TestFlight upload script
         # passes CODE_SIGN_STYLE=Manual and these per-target profile names.
-        PROVISIONING_PROFILE_SPECIFIER: "$(RELAY_PROFILE_APP)"
+        PROVISIONING_PROFILE_SPECIFIER: "$(ATERMINAL_PROFILE_APP)"
         CURRENT_PROJECT_VERSION: "2"
         MARKETING_VERSION: "1.0"
     info:
-      path: Relay/Info.plist
+      path: aTerminal/Info.plist
       properties:
         CFBundleDisplayName: a-Terminal
         UILaunchScreen: {}
@@ -57,49 +58,49 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: com.aaroncx.relay
             CFBundleURLSchemes:
-              - relay
-  RelayWidgets:
+              - aterminal
+  aTerminalWidgets:
     type: app-extension
     platform: iOS
     sources:
-      - RelayWidgets
+      - aTerminalWidgets
       # Shared ActivityAttributes — must compile identically in both targets.
-      - path: Relay/LiveActivity/SessionActivityAttributes.swift
+      - path: aTerminal/LiveActivity/SessionActivityAttributes.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.aaroncx.relay.widgets
         TARGETED_DEVICE_FAMILY: "1"
-        PROVISIONING_PROFILE_SPECIFIER: "$(RELAY_PROFILE_WIDGET)"
+        PROVISIONING_PROFILE_SPECIFIER: "$(ATERMINAL_PROFILE_WIDGET)"
         CURRENT_PROJECT_VERSION: "2"
         MARKETING_VERSION: "1.0"
     info:
-      path: RelayWidgets/Info.plist
+      path: aTerminalWidgets/Info.plist
       properties:
         CFBundleDisplayName: a-Terminal Widgets
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
-  RelayTests:
+  aTerminalTests:
     type: bundle.unit-test
     platform: iOS
     sources:
-      - RelayTests
+      - aTerminalTests
     dependencies:
-      - target: Relay
+      - target: aTerminal
       # Compile against Citadel but resolve symbols from the host app binary
       # at run time — linking the package twice breaks the test bundle link.
       - package: Citadel
         link: false
 schemes:
-  Relay:
+  aTerminal:
     build:
       targets:
-        Relay: all
+        aTerminal: all
     run:
       config: Debug
       # Local StoreKit config so tips/subscriptions are testable in the
       # simulator without App Store Connect.
-      storeKitConfiguration: Relay.storekit
+      storeKitConfiguration: aTerminal.storekit
     test:
       config: Debug
       targets:
-        - RelayTests
+        - aTerminalTests

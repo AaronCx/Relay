@@ -1,4 +1,4 @@
-# Relay
+# a-Terminal
 
 Privacy-first iOS SSH terminal, optimized for one workflow: **iPhone → Tailscale → Mac mini → tmux → Claude Code**.
 
@@ -15,7 +15,7 @@ Free, donation-supported. No features are paywalled, ever.
 Requires Xcode 26+ (iOS 26 SDK), [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`).
 
 ```sh
-make generate   # regenerate Relay.xcodeproj from project.yml
+make generate   # regenerate aTerminal.xcodeproj from project.yml
 make build      # build for the iOS simulator
 make test       # run unit tests
 ```
