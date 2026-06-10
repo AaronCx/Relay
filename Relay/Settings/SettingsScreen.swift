@@ -7,7 +7,7 @@ struct SettingsScreen: View {
     @Environment(AppSettings.self) private var settings
     @Environment(TipStore.self) private var tipStore
 
-    private let supportEmail = "chillzs51@gmail.com"
+    private let supportURL = URL(string: "https://github.com/AaronCx/Relay/issues")!
     private let privacyPolicyURL = URL(string: "https://aaroncx.github.io/Relay/privacy")!
 
     var body: some View {
@@ -71,8 +71,8 @@ struct SettingsScreen: View {
                 }
 
                 Section("Support") {
-                    Link(destination: URL(string: "mailto:\(supportEmail)?subject=Relay%20Support")!) {
-                        Label("Email Support", systemImage: "envelope")
+                    Link(destination: supportURL) {
+                        Label("Report an Issue", systemImage: "questionmark.circle")
                     }
                 }
 
