@@ -48,6 +48,7 @@ final class TerminalSession: Identifiable, Hashable {
     private var io: SessionIO?
     private var scrollBridge: ScrollBridge?
     private var pumpTask: Task<Void, Never>?
+    private var reconnectLoop: Task<Void, Never>?
     private(set) var lastRequestedSize: (cols: Int, rows: Int)?
 
     init(server: Server, keyStore: KeyStore, serverStore: ServerStore, settings: AppSettings) {
@@ -104,10 +105,20 @@ final class TerminalSession: Identifiable, Hashable {
     }
 
     /// Reconnect contract (§4.1): exponential backoff 0.5s → 1s → 2s.
+    /// Single-flight: a dropped channel, the foreground handler, and the retry
+    /// button can all request a reconnect around the same moment — running two
+    /// loops opens two PTYs that paint over each other on one screen.
     func reconnect(maxAttempts: Int = 3) async {
         guard state == .suspended || state == .reconnecting else { return }
+        if let reconnectLoop {
+            await reconnectLoop.value
+            return
+        }
         state = .reconnecting
-        await attemptLoop(maxAttempts: maxAttempts)
+        let loop = Task { await attemptLoop(maxAttempts: maxAttempts) }
+        reconnectLoop = loop
+        await loop.value
+        reconnectLoop = nil
     }
 
     /// Cleanly close the socket while backgrounded; tmux survives.
@@ -181,6 +192,9 @@ final class TerminalSession: Identifiable, Hashable {
             rows: size.rows
         ))
         connection = fresh
+        // Clear whatever the dead PTY left on screen before the new shell and
+        // tmux attach repaint — otherwise old and new frames overlay.
+        terminalView.getTerminal().resetToInitialState()
 
         if server.knownHostKey == nil, let presented = await fresh.serverHostKey {
             // TOFU: pin what the server presented on first contact.
