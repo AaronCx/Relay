@@ -16,6 +16,6 @@ The only network traffic Relay produces is the SSH connection **you** initiate t
 
 **Purchases** (tips and the supporter subscription) are handled by Apple through the App Store. We never see your payment details.
 
-If you have questions, email support — the address is in the app's Settings tab. That email goes to a human, not a ticketing system, and is the only way any information ever reaches us: when you choose to send it.
+If you have questions, use the support link in the app's Settings tab (it opens the public GitHub issue tracker). Anything you post there is the only way information ever reaches us: when you choose to share it.
 
 _This page mirrors the policy bundled inside the app. Last updated: June 2026_
