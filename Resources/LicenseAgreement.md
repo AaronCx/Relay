@@ -10,6 +10,6 @@ In plain language:
 - You are responsible for the servers you connect to and the commands you run on them.
 - Tips and supporter subscriptions are donations handled by Apple; they unlock no features and are non-refundable except as provided by App Store policy.
 
-a-Terminal's source code is separately available under the MIT License at https://github.com/AaronCx/Relay.
+a-Terminal's source code is separately available under the MIT License at https://github.com/AaronCx/a-Terminal.
 
 _Last updated: June 2026_

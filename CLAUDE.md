@@ -1,10 +1,10 @@
-# Relay — CC environment notes
+# a-Terminal — CC environment notes
 
 Privacy-first iOS SSH terminal. Spec: `~/Documents/github/relay-ios-terminal-spec.md`.
 
 ## Build rules
 
-- The Xcode project is **generated**: always run `make generate` after editing `project.yml`. Never edit `Relay.xcodeproj` directly (it is gitignored).
+- The Xcode project is **generated**: always run `make generate` after editing `project.yml`. Never edit `aTerminal.xcodeproj` directly (it is gitignored).
 - Xcode is not the system default toolchain on this Mac — the Makefile exports `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`. Prefix any raw `xcodebuild`/`xcrun` call with it.
 - Build: `make build` (picks the first available iPhone simulator; locally that is iPhone 17 Pro). Tests: `make test`.
 - Signing, device deploys, and App Store Connect / StoreKit Connect setup are human-in-Xcode steps — stop and ask.

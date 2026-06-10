@@ -8,7 +8,7 @@ Run before each release. Manual, on a device or simulator from Xcode.
 2. Exercise the hot paths in this order, watching for leak flags and abandoned
    memory between generations (`Cmd+Shift+M` to mark):
    - Open a session → close it (red ✕) → repeat ×5. The `TerminalSession`,
-     `SSHConnection`, and `RelayTerminalView` for each must be released.
+     `SSHConnection`, and `TerminalEmulatorView` for each must be released.
    - Backgrounding: connect → background 30s (grace suspend) → foreground
      (reconnect) ×3. Each reconnect allocates a fresh `SSHConnection`; the
      prior one must be released after `channelEnded`.
