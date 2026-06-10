@@ -57,6 +57,14 @@ final class ServerStoreTests: XCTestCase {
         XCTAssertEqual(Server(name: "a", host: "h", port: 2222, username: "u").displayAddress, "h:2222")
     }
 
+    func testGroupPersists() {
+        let store = ServerStore(fileURL: fileURL)
+        var server = Server(name: "mini", host: "h", username: "u")
+        server.group = "Home"
+        store.add(server)
+        XCTAssertEqual(ServerStore(fileURL: fileURL).servers.first?.group, "Home")
+    }
+
     func testLegacyJSONWithoutPasswordRefDecodes() throws {
         // Server lists written before password auth existed must keep loading.
         let legacy = """

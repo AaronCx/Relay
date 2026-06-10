@@ -7,7 +7,7 @@ import NIOSSH
 
 /// Accepts public-key auth for exactly one allowed key.
 final class SingleKeyAuthDelegate: NIOSSHServerUserAuthenticationDelegate {
-    static let acceptedPassword = "open-sesame"
+    static let acceptedPassword = "open-sesame" // lastgate-ignore (in-process test server fixture)
 
     let supportedAuthenticationMethods: NIOSSHAvailableUserAuthenticationMethods = [.publicKey, .password]
     let allowedKey: NIOSSHPublicKey

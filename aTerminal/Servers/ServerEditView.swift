@@ -9,7 +9,7 @@ struct ServerEditView: View {
 
     enum AuthMode: String, CaseIterable, Identifiable {
         case key = "SSH Key"
-        case password = "Password"
+        case password = "Password" // lastgate-ignore (UI label, not a credential)
         var id: String { rawValue }
     }
 
@@ -45,6 +45,10 @@ struct ServerEditView: View {
                     TextField("Username", text: $server.username)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
+                    TextField("Group (optional)", text: Binding(
+                        get: { server.group ?? "" },
+                        set: { server.group = $0.trimmingCharacters(in: .whitespaces).isEmpty ? nil : $0 }
+                    ))
                 }
 
                 Section {

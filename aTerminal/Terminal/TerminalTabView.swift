@@ -32,32 +32,36 @@ struct TerminalTabView: View {
                     }
                 }
 
-                Section("Servers") {
-                    if serverStore.servers.isEmpty {
+                if serverStore.servers.isEmpty {
+                    Section("Servers") {
                         ContentUnavailableView(
                             "No Servers",
                             systemImage: "server.rack",
                             description: Text("Tap + to add your first server.")
                         )
-                    } else {
-                        ForEach(serverStore.servers) { server in
-                            ServerRow(server: server)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    path = [sessionManager.open(server: server)]
-                                }
-                                .contextMenu {
-                                    Button {
-                                        editingServer = server
-                                    } label: {
-                                        Label("Edit", systemImage: "pencil")
+                    }
+                } else {
+                    ForEach(serverGroups, id: \.title) { group in
+                        Section(group.title) {
+                            ForEach(group.servers) { server in
+                                ServerRow(server: server)
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        path = [sessionManager.open(server: server)]
                                     }
-                                    Button(role: .destructive) {
-                                        serverStore.remove(id: server.id)
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
+                                    .contextMenu {
+                                        Button {
+                                            editingServer = server
+                                        } label: {
+                                            Label("Edit", systemImage: "pencil")
+                                        }
+                                        Button(role: .destructive) {
+                                            serverStore.remove(id: server.id)
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
                                     }
-                                }
+                            }
                         }
                     }
                 }
@@ -105,6 +109,19 @@ struct TerminalTabView: View {
                 ServerEditView(server: server)
             }
         }
+    }
+
+    /// Ungrouped servers first under "Servers", then named groups A→Z.
+    private var serverGroups: [(title: String, servers: [Server])] {
+        let grouped = Dictionary(grouping: serverStore.servers) { $0.group }
+        var result: [(title: String, servers: [Server])] = []
+        if let ungrouped = grouped[nil], !ungrouped.isEmpty {
+            result.append((title: "Servers", servers: ungrouped))
+        }
+        for name in grouped.keys.compactMap({ $0 }).sorted() {
+            result.append((title: name, servers: grouped[name] ?? []))
+        }
+        return result
     }
 
     /// Live Activity tap → land inside the session (§4.5). After an app
