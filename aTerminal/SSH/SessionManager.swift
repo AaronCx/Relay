@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftTerm
 import Observation
+import Citadel
 
 enum SessionState: Equatable {
     case connecting
@@ -35,6 +36,8 @@ final class TerminalSession: Identifiable, Hashable {
     private(set) var lastError: String?
     /// SessionManager hook for Live Activity updates (§4.5).
     @ObservationIgnored var onStateChange: (() -> Void)?
+    /// Fired when the remote shell ends on its own (the user typed `exit`).
+    @ObservationIgnored var onShellExit: (() -> Void)?
 
     let bridge = TerminalBridge()
     let terminalView = TerminalEmulatorView(frame: .zero)
@@ -262,16 +265,30 @@ final class TerminalSession: Identifiable, Hashable {
                 self.terminalView.feed(byteArray: ArraySlice([UInt8](chunk)))
             }
             guard let self, !Task.isCancelled else { return }
-            self.channelDropped()
+            self.channelEnded(connection)
         }
     }
 
-    /// The PTY ended without the user asking — network drop or remote exit.
-    /// Retry patiently enough to ride out a Wi-Fi blip (§4.1 acceptance).
-    private func channelDropped() {
+    /// The PTY ended without the user closing the session. A transport error
+    /// means a drop — retry patiently enough to ride out a Wi-Fi blip (§4.1).
+    /// A clean end means the remote shell exited (`exit`): close the session
+    /// like a terminal should, instead of resurrecting the connection.
+    private func channelEnded(_ endedConnection: SSHConnection) {
         guard state == .connected else { return }
-        state = .reconnecting
-        Task { await reconnect(maxAttempts: 10) }
+        Task {
+            var transportError: Error?
+            if case .disconnected(let error) = await endedConnection.state {
+                transportError = error
+            }
+            // A non-zero shell exit surfaces as CommandFailed — still `exit`.
+            if let transportError, !(transportError is SSHClient.CommandFailed) {
+                state = .reconnecting
+                await reconnect(maxAttempts: 10)
+            } else {
+                state = .closed
+                onShellExit?()
+            }
+        }
     }
 
     enum SessionError: LocalizedError {
@@ -353,6 +370,11 @@ final class SessionManager {
         )
         session.onStateChange = { [weak self] in
             self?.refreshActivity()
+        }
+        session.onShellExit = { [weak self, weak session] in
+            guard let self, let session else { return }
+            self.sessions.removeAll { $0.id == session.id }
+            self.refreshActivity()
         }
         sessions.append(session)
         Task { await session.connect() }

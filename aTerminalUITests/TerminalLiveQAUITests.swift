@@ -142,6 +142,12 @@ final class TerminalLiveQAUITests: XCTestCase {
         type("echo TMUX-MARKER-BRAVO\n")
         shot("07-tmux-echo")
 
+        // C-b prefix key: one tap + "c" must open a second tmux window.
+        app.buttons["tmux prefix Control-B"].tap()
+        sleep(1)
+        type("c", settle: 3)
+        shot("07b-tmux-new-window")
+
         // Keyboard dismiss/show cycle — the resize path that broke rendering.
         app.buttons["Toggle Keyboard"].tap()
         sleep(3)

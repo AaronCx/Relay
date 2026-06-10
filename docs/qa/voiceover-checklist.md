@@ -10,6 +10,7 @@ Status from the PR 12 audit. Re-verify on device with VoiceOver on
 | Add server `+` | "Add Server" | TerminalTabView toolbar |
 | Session close ✕ | "Close Session" | SessionRow |
 | Ctrl sticky key | "Control" + selected trait when armed | KeyAccessoryBar |
+| tmux prefix key | "tmux prefix Control-B" | KeyAccessoryBar |
 | Paste key | "Paste" | KeyAccessoryBar |
 | Mic | "Dictate" | KeyAccessoryBar |
 | Keyboard toggle | "Toggle Keyboard" | KeyAccessoryBar |

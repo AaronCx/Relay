@@ -217,11 +217,21 @@ actor SSHConnection {
                     if readyOnce.trySet() {
                         ready.resume(throwing: error)
                     } else {
-                        await self.channelEnded(error)
+                        await self.channelEnded(Self.normalizeChannelEnd(error))
                     }
                 }
             }
         }
+    }
+
+    /// `withPTY` closes the channel after the shell ends; when the remote
+    /// already closed it (the user typed `exit`), that close throws
+    /// `alreadyClosed` — a clean end, not a transport failure.
+    private static func normalizeChannelEnd(_ error: Error) -> Error? {
+        if let channelError = error as? ChannelError, channelError == .alreadyClosed {
+            return nil
+        }
+        return error
     }
 
     private func adopt(writer: TTYStdinWriter) {
