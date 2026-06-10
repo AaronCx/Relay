@@ -43,6 +43,8 @@ targets:
           - UIInterfaceOrientationLandscapeRight
         NSSupportsLiveActivities: true
         ITSAppUsesNonExemptEncryption: false
+        NSMicrophoneUsageDescription: "Relay uses the microphone for voice dictation into your terminal. Audio is processed entirely on this device and never uploaded anywhere."
+        NSSpeechRecognitionUsageDescription: "Relay transcribes dictation on-device only. Your speech never leaves this iPhone — Relay never falls back to server-based recognition."
         CFBundleURLTypes:
           - CFBundleURLName: com.aaroncx.relay
             CFBundleURLSchemes:
