@@ -7,6 +7,8 @@ struct Server: Codable, Identifiable, Equatable, Hashable {
     var host: String
     var port: Int = 22
     var username: String
+    /// Optional list grouping (e.g. "Home", "Work"). Nil = ungrouped.
+    var group: String?
     /// Reference into KeyStore. Contains no secret material.
     var keyID: UUID?
     /// Reference into PasswordStore (Keychain) for password auth. The JSON
