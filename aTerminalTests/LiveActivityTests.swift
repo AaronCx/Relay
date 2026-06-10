@@ -75,4 +75,14 @@ final class SessionActivityControllerTests: XCTestCase {
         XCTAssertEqual(controller.lastPushedState?.activeCount, 0, "grace window must show zero sessions")
         XCTAssertEqual(controller.lastPushedState?.sessions.isEmpty, true)
     }
+
+    func testReviveAfterZeroPushesLiveContent() {
+        // Regression: after hitting zero, new sessions never reached the
+        // Island again (the controller kept talking to an ended Activity).
+        let controller = SessionActivityController()
+        controller.update(with: [summary()])
+        controller.update(with: [])
+        controller.update(with: [summary(), summary()])
+        XCTAssertEqual(controller.lastPushedState?.activeCount, 2, "new sessions must produce live content after a zero state")
+    }
 }
