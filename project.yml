@@ -1,0 +1,74 @@
+name: Relay
+options:
+  bundleIdPrefix: com.aaroncx
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.10"
+    TARGETED_DEVICE_FAMILY: "1"
+    CODE_SIGN_STYLE: Automatic
+targets:
+  Relay:
+    type: application
+    platform: iOS
+    sources:
+      - Relay
+    dependencies:
+      - target: RelayWidgets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.aaroncx.relay
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        CURRENT_PROJECT_VERSION: "1"
+        MARKETING_VERSION: "0.1.0"
+    info:
+      path: Relay/Info.plist
+      properties:
+        CFBundleDisplayName: Relay
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        NSSupportsLiveActivities: true
+        ITSAppUsesNonExemptEncryption: false
+        CFBundleURLTypes:
+          - CFBundleURLName: com.aaroncx.relay
+            CFBundleURLSchemes:
+              - relay
+  RelayWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - RelayWidgets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.aaroncx.relay.widgets
+        CURRENT_PROJECT_VERSION: "1"
+        MARKETING_VERSION: "0.1.0"
+    info:
+      path: RelayWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: RelayWidgets
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+  RelayTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - RelayTests
+    dependencies:
+      - target: Relay
+schemes:
+  Relay:
+    build:
+      targets:
+        Relay: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - RelayTests
