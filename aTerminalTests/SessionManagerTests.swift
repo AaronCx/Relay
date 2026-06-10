@@ -174,7 +174,7 @@ final class SessionManagerTests: XCTestCase {
         try await waitFor("session to close") { session.state == .closed }
     }
 
-    func testDropReconnectsAndReattachesTmux() async throws {
+    func testShellExitClosesSessionInsteadOfReconnecting() async throws {
         settings.autoReattachTmux = true
         let session = manager.open(server: makeServer(lastTmuxTarget: "main"))
         try await waitFor("session to connect") { session.state == .connected }
@@ -182,12 +182,18 @@ final class SessionManagerTests: XCTestCase {
         // when a target is recorded — including this first connect.
         try await waitFor("attach after connect") { shell.received.contains("tmux attach -t 'main'") }
 
-        // Drop the channel mid-session: the session must notice, reconnect on
-        // its own, and re-attach tmux (Wi-Fi-loss acceptance test, §4.1).
+        // The shell ending cleanly (the user typed `exit`) must close the
+        // session — not resurrect it. (Transport errors still reconnect;
+        // that path is covered by the suspend/foreground test, since the
+        // in-process server can only end channels cleanly.)
         session.sendInput(Data("DROP-CHANNEL\n".utf8))
-        try await waitFor("session to reconnect without user input", timeout: 30) {
-            session.state == .connected && shell.received.components(separatedBy: "tmux attach -t 'main'").count > 2
+        try await waitFor("session to close after shell exit", timeout: 15) {
+            session.state == .closed && self.manager.sessions.isEmpty
         }
+        XCTAssertEqual(
+            shell.received.components(separatedBy: "tmux attach -t 'main'").count, 2,
+            "no reconnect attach may follow a clean shell exit"
+        )
     }
 
     func testWindowSizeReplayedAfterConnect() async throws {

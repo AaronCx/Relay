@@ -62,6 +62,9 @@ struct TerminalScreen: View {
         .onChange(of: session.state) { _, newState in
             if newState == .connected {
                 session.bridge.focus()
+            } else if newState == .closed {
+                // The remote shell exited (`exit`) — leave the screen too.
+                dismiss()
             }
         }
         .onAppear {
