@@ -4,7 +4,7 @@ Paste a tailored version of this into App Store Connect → App Review Informati
 
 ---
 
-a-Terminal is an SSH terminal. Like other terminal apps on the App Store
+a+Terminal is an SSH terminal. Like other terminal apps on the App Store
 (Terminal#, Termius, Blink Shell, La Terminal), it requires the user's **own
 SSH server** — there is no demo account because there are no accounts: the
 app connects directly from the device to a server the user controls.

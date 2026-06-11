@@ -2,10 +2,10 @@
 
 ## Identity
 
-- **Name:** a-Terminal — SSH Terminal
+- **Name:** a+Terminal — SSH Terminal
 - **Subtitle:** tmux & Claude Code on the go
-- **Bundle ID:** `com.aaroncx.relay`
-- **SKU:** `relay-ios`
+- **Bundle ID:** `com.aaroncx.aplusterminal`
+- **SKU:** `aplusterminal-ios`
 - **Primary category:** Developer Tools
 - **Secondary category:** Utilities
 - **Price:** Free (IAP: 3 tip consumables + supporter subscription)
@@ -13,7 +13,7 @@
 
 ## Description (draft)
 
-a-Terminal is a privacy-first SSH terminal built for one workflow: working on your
+a+Terminal is a privacy-first SSH terminal built for one workflow: working on your
 own machines from your iPhone — especially tmux and AI coding agents like
 Claude Code.
 
@@ -26,7 +26,7 @@ terminal. Recognition runs entirely on your iPhone; audio never leaves the
 device.
 
 **Never lose your session.** Live Activities and the Dynamic Island show your
-active sessions at a glance. Tap to jump back in — a-Terminal reconnects and
+active sessions at a glance. Tap to jump back in — a+Terminal reconnects and
 re-attaches tmux automatically.
 
 **Zero data collection.** No analytics, no accounts, no crash SDKs, no
@@ -34,7 +34,7 @@ servers of ours. The App Privacy label says "Data Not Collected" because
 there is nothing to collect it with. The only network traffic is your own
 SSH connection.
 
-**Free forever.** Every feature is free. If a-Terminal saves you time, there's a
+**Free forever.** Every feature is free. If a+Terminal saves you time, there's a
 tip jar — and a supporter badge if you subscribe. Nothing is paywalled, ever.
 
 - ed25519 keys generated on-device, stored in the Keychain (never exportable,
@@ -50,9 +50,9 @@ tip jar — and a supporter badge if you subscribe. Nothing is paywalled, ever.
 
 ## URLs
 
-- Support URL: https://github.com/AaronCx/a-Terminal/issues
-- Marketing URL: https://github.com/AaronCx/a-Terminal
-- Privacy Policy URL: https://aaroncx.github.io/a-Terminal/privacy/
+- Support URL: https://github.com/AaronCx/a-plus-terminal/issues
+- Marketing URL: https://github.com/AaronCx/a-plus-terminal
+- Privacy Policy URL: https://aaroncx.github.io/a-plus-terminal/privacy/
 
 ## Review notes
 
