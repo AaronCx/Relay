@@ -1,6 +1,6 @@
 # Export compliance (encryption)
 
-a-Terminal uses standard SSH encryption via SwiftNIO SSH / Citadel (and Apple's
+a+Terminal uses standard SSH encryption via SwiftNIO SSH / Citadel (and Apple's
 CryptoKit for key generation). That makes it **exempt** under category 5D002
 mass-market / standard-protocol provisions, but it still requires the annual
 self-classification report.
@@ -27,7 +27,7 @@ CSV to BIS and the ENC Encryption Request Coordinator:
 
 ```csv
 PRODUCT NAME,MODEL NUMBER,MANUFACTURER,ECCN,AUTHORIZATION TYPE,ITEM TYPE,SUBMITTER NAME,TELEPHONE NUMBER,E-MAIL ADDRESS,MAILING ADDRESS
-a-Terminal,N/A,Aaron Character,5D992.c,MMKT,Mobility and mobile applications n.e.s.,Aaron Character,[PHONE],[EMAIL],[ADDRESS]
+a+Terminal,N/A,Aaron Character,5D992.c,MMKT,Mobility and mobile applications n.e.s.,Aaron Character,[PHONE],[EMAIL],[ADDRESS]
 ```
 
 Reference: 15 CFR §742.15(b) and Apple's "Complying with Encryption Export
