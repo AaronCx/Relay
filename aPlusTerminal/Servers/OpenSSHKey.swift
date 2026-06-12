@@ -32,6 +32,49 @@ enum OpenSSHKey {
         return comment.isEmpty ? line : "\(line) \(comment)"
     }
 
+    /// Serializes an ed25519 private key as an unencrypted openssh-key-v1 PEM —
+    /// the exact format `ssh-keygen` writes and `parsePrivateKey` reads.
+    /// Only ever called from an explicit user action (reveal / export).
+    static func privateKeyPEM(_ key: Curve25519.Signing.PrivateKey, comment: String) -> String {
+        var publicBlob = Data()
+        publicBlob.appendSSHString(Data("ssh-ed25519".utf8))
+        publicBlob.appendSSHString(key.publicKey.rawRepresentation)
+
+        var privateBlock = Data()
+        var check = UInt32.random(in: .min ... .max).bigEndian
+        privateBlock.append(Data(bytes: &check, count: 4))
+        privateBlock.append(Data(bytes: &check, count: 4))
+        privateBlock.appendSSHString(Data("ssh-ed25519".utf8))
+        privateBlock.appendSSHString(key.publicKey.rawRepresentation)
+        privateBlock.appendSSHString(key.rawRepresentation + key.publicKey.rawRepresentation)
+        privateBlock.appendSSHString(Data(comment.utf8))
+        var pad: UInt8 = 1
+        while privateBlock.count % 8 != 0 {
+            privateBlock.append(pad)
+            pad += 1
+        }
+
+        var blob = Data("openssh-key-v1\0".utf8)
+        blob.appendSSHString(Data("none".utf8))
+        blob.appendSSHString(Data("none".utf8))
+        blob.appendSSHString(Data())
+        var one = UInt32(1).bigEndian
+        blob.append(Data(bytes: &one, count: 4))
+        blob.appendSSHString(publicBlob)
+        blob.appendSSHString(privateBlock)
+
+        var lines = ["-----BEGIN OPENSSH PRIVATE KEY-----"]
+        let base64 = blob.base64EncodedString()
+        var index = base64.startIndex
+        while index < base64.endIndex {
+            let end = base64.index(index, offsetBy: 70, limitedBy: base64.endIndex) ?? base64.endIndex
+            lines.append(String(base64[index..<end]))
+            index = end
+        }
+        lines.append("-----END OPENSSH PRIVATE KEY-----")
+        return lines.joined(separator: "\n")
+    }
+
     /// Parses an unencrypted `-----BEGIN OPENSSH PRIVATE KEY-----` blob (openssh-key-v1).
     static func parsePrivateKey(_ pem: String) throws -> Curve25519.Signing.PrivateKey {
         let lines = pem.split(whereSeparator: \.isNewline).map { $0.trimmingCharacters(in: .whitespaces) }

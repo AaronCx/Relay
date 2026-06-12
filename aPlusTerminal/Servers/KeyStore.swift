@@ -34,7 +34,8 @@ protocol SecretStore {
 }
 
 /// Generic-password Keychain items, `WhenUnlockedThisDeviceOnly` — never synced,
-/// never in backups, never exportable through UI.
+/// never in backups. Private keys leave the Keychain only through an explicit
+/// user action (reveal/copy/export in Manage Keys).
 /// The service string matches the bundle ID prefix; once 1.0 ships, renaming
 /// it would orphan keys stored by earlier builds — don't.
 final class KeychainSecretStore: SecretStore {
@@ -153,6 +154,15 @@ final class KeyStore {
 
     func key(for id: UUID) -> SSHKey? {
         keys.first { $0.id == id }
+    }
+
+    /// OpenSSH PEM of the private key. Only call from an explicit user
+    /// action — this is the single path by which key material leaves the
+    /// Keychain.
+    func privateKeyPEM(for id: UUID) throws -> String {
+        let privateKey = try privateKey(for: id)
+        let name = key(for: id)?.name ?? "key"
+        return OpenSSHKey.privateKeyPEM(privateKey, comment: "aplusterminal-\(name)")
     }
 
     func deleteKey(id: UUID) throws {

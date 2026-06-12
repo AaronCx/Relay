@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ServerEditView: View {
     @Environment(\.dismiss) private var dismiss
@@ -18,6 +19,7 @@ struct ServerEditView: View {
     @State private var authMode: AuthMode
     @State private var passwordText = ""
     @State private var showKeyImport = false
+    @State private var createdKey: SSHKey?
     @State private var errorMessage: String?
 
     private let isNew: Bool
@@ -82,7 +84,7 @@ struct ServerEditView: View {
                     Text("Authentication")
                 } footer: {
                     Text(authMode == .key
-                        ? "Keys are stored in the Keychain on this device only and never leave it. Export the public key and add it to the server's authorized_keys."
+                        ? "Keys are stored in this device's Keychain. View, copy, or export them any time in Settings › Manage Keys. Add the public key to the server's authorized_keys."
                         : "The password is stored in this device's Keychain only — never in the server list, never synced.")
                 }
 
@@ -114,6 +116,19 @@ struct ServerEditView: View {
                     server.keyID = importedID
                 }
             }
+            // Show the freshly generated keypair immediately — the public
+            // half needs to reach the server's authorized_keys, and the
+            // private half should be visible/exportable at creation time.
+            .sheet(item: $createdKey) { key in
+                NavigationStack {
+                    KeyDetailView(keyID: key.id)
+                        .toolbar {
+                            ToolbarItem(placement: .confirmationAction) {
+                                Button("Done") { createdKey = nil }
+                            }
+                        }
+                }
+            }
         }
     }
 
@@ -130,6 +145,7 @@ struct ServerEditView: View {
             let name = server.name.trimmingCharacters(in: .whitespaces)
             let key = try keyStore.generateKey(named: name.isEmpty ? "aplusterminal" : name)
             server.keyID = key.id
+            createdKey = key
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -198,6 +214,7 @@ struct KeyImportView: View {
 
     @State private var name = ""
     @State private var pem = ""
+    @State private var showFilePicker = false
     @State private var errorMessage: String?
 
     var body: some View {
@@ -213,16 +230,28 @@ struct KeyImportView: View {
                         .frame(minHeight: 160)
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.never)
+                    Button {
+                        showFilePicker = true
+                    } label: {
+                        Label("Choose Key File…", systemImage: "folder")
+                    }
                 } header: {
                     Text("Private Key")
                 } footer: {
-                    Text("Paste an unencrypted OpenSSH ed25519 private key (BEGIN OPENSSH PRIVATE KEY). It is stored in this device's Keychain only.")
+                    Text("Paste an unencrypted OpenSSH ed25519 private key (BEGIN OPENSSH PRIVATE KEY), or pick the key file (e.g. id_ed25519) from Files. It is stored in this device's Keychain only.")
                 }
                 if let errorMessage {
                     Section {
                         Text(errorMessage).foregroundStyle(.red)
                     }
                 }
+            }
+            .fileImporter(
+                isPresented: $showFilePicker,
+                allowedContentTypes: [.item],
+                allowsMultipleSelection: false
+            ) { result in
+                loadKeyFile(result)
             }
             .navigationTitle("Import Key")
             .navigationBarTitleDisplayMode(.inline)
@@ -245,6 +274,24 @@ struct KeyImportView: View {
             dismiss()
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    /// Reads a picked key file into the editor. Files outside the sandbox
+    /// need security-scoped access; key files are tiny, so a synchronous
+    /// read is fine.
+    private func loadKeyFile(_ result: Result<[URL], Error>) {
+        do {
+            guard let url = try result.get().first else { return }
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+            pem = try String(contentsOf: url, encoding: .utf8)
+            if name.trimmingCharacters(in: .whitespaces).isEmpty {
+                name = url.lastPathComponent
+            }
+            errorMessage = nil
+        } catch {
+            errorMessage = "Couldn't read the key file: \(error.localizedDescription)"
         }
     }
 }
