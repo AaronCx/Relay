@@ -75,6 +75,51 @@ final class TerminalLiveQAUITests: XCTestCase {
         sleep(settle)
     }
 
+    /// Pins the key-management flow: generate from Manage Keys, land in the
+    /// detail screen, reveal the private key. Losing reveal/export would
+    /// regress a headline capability, so it's a release blocker.
+    func testKeyManagementGenerateAndReveal() {
+        app.tabBars.buttons["Settings"].tap()
+        sleep(1)
+        // The SSH Keys section sits below the fold on most devices.
+        let manageKeys = app.staticTexts["Manage Keys"]
+        var swipes = 0
+        while !manageKeys.isHittable && swipes < 4 {
+            app.swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(manageKeys.waitForExistence(timeout: 5), "Manage Keys row missing")
+        manageKeys.tap()
+        sleep(1)
+
+        app.buttons["Add Key"].tap()
+        app.buttons["Generate New Key"].tap()
+        let nameField = app.textFields["Key name"]
+        XCTAssertTrue(nameField.waitForExistence(timeout: 5), "generate alert missing")
+        nameField.tap()
+        nameField.typeText("qa-reveal")
+        app.buttons["Generate"].tap()
+        sleep(1)
+
+        let row = app.staticTexts["qa-reveal"]
+        XCTAssertTrue(row.waitForExistence(timeout: 5), "generated key missing from list")
+        row.tap()
+        sleep(1)
+        shot("40-key-detail")
+
+        app.buttons["Reveal Private Key"].tap()
+        let pem = app.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS 'BEGIN OPENSSH PRIVATE KEY'")).firstMatch
+        XCTAssertTrue(pem.waitForExistence(timeout: 5), "revealed private key not shown")
+        XCTAssertTrue(app.buttons["Save to Files"].exists, "Save to Files missing")
+        shot("41-key-revealed")
+
+        // Clean up so reruns don't accumulate keys.
+        app.swipeUp()
+        app.buttons["Delete Key"].tap()
+        sleep(1)
+    }
+
     /// Compliance pin (App Review Guideline 3.1.2): the Supporter card must
     /// surface auto-renewal terms plus Privacy Policy and Terms of Use links
     /// at the point of purchase — reviewers reject subscription apps without

@@ -12,7 +12,7 @@ The only network traffic a+Terminal produces is the SSH connection **you** initi
 
 **Voice dictation** is transcribed entirely on your iPhone using Apple's on-device speech recognition. a+Terminal refuses to run dictation if on-device recognition is unavailable — it never falls back to cloud transcription.
 
-**Your keys and servers** stay on your device: SSH private keys live in the iOS Keychain (this device only, excluded from backups, never exportable), and your server list is a local file containing no secrets.
+**Your keys and servers** stay on your device: SSH private keys live in the iOS Keychain (this device only, excluded from backups; they leave the Keychain only when you explicitly reveal, copy, or export them in Manage Keys), and your server list is a local file containing no secrets.
 
 **Purchases** (tips and the supporter subscription) are handled by Apple through the App Store. We never see your payment details.
 

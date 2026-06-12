@@ -141,6 +141,41 @@ final class KeyStoreTests: XCTestCase {
 }
 
 final class OpenSSHKeyTests: XCTestCase {
+    func testProductionSerializerRoundTrips() throws {
+        let original = Curve25519.Signing.PrivateKey()
+        let pem = OpenSSHKey.privateKeyPEM(original, comment: "roundtrip")
+        let parsed = try OpenSSHKey.parsePrivateKey(pem)
+        XCTAssertEqual(parsed.rawRepresentation, original.rawRepresentation)
+        XCTAssertTrue(pem.hasPrefix(OpenSSHFixture.pemHeader)) // lastgate-ignore
+        XCTAssertTrue(pem.hasSuffix(OpenSSHFixture.pemFooter)) // lastgate-ignore
+    }
+
+    func testProductionSerializerMatchesIndependentEncoder() throws {
+        // Same key through the production serializer and the test-side
+        // fixture encoder must parse to identical key material.
+        let key = Curve25519.Signing.PrivateKey()
+        let viaProduction = try OpenSSHKey.parsePrivateKey(OpenSSHKey.privateKeyPEM(key, comment: "x"))
+        let viaFixture = try OpenSSHKey.parsePrivateKey(OpenSSHFixture.privateKeyPEM(for: key))
+        XCTAssertEqual(viaProduction.rawRepresentation, viaFixture.rawRepresentation)
+    }
+
+    func testStoreExportsPrivateKeyPEMThatReimports() throws {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("keys-export-test.json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let store = KeyStore(secrets: InMemorySecretStore(), metadataURL: url)
+        let key = try store.generateKey(named: "exportme")
+        let pem = try store.privateKeyPEM(for: key.id)
+        let parsed = try OpenSSHKey.parsePrivateKey(pem)
+        XCTAssertEqual(try store.privateKey(for: key.id).rawRepresentation, parsed.rawRepresentation)
+        // Exported PEM re-imports as a working key with the same public half.
+        let reimported = try store.importKey(named: "reimport", openSSHPrivateKey: pem)
+        XCTAssertEqual(
+            reimported.publicKeyLine.split(separator: " ")[1],
+            key.publicKeyLine.split(separator: " ")[1]
+        )
+    }
+
     func testParseRecoversGeneratedKey() throws {
         let original = Curve25519.Signing.PrivateKey()
         let parsed = try OpenSSHKey.parsePrivateKey(OpenSSHFixture.privateKeyPEM(for: original))
